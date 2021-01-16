@@ -1,6 +1,6 @@
 " Script scope variables:
 "   s:pattern, s:pattern_final, s:op, s:ed, s:begcol,
-"   s:ph_begin, s:placeholders_count, s:named
+"   s:ph_begin, s:placeholders_count, s:named, s:foo
 
 let s:pattern  = ""
 
@@ -64,6 +64,8 @@ function! s:insertFile(snipfile) abort
   " For adjusting the indentation (use the current line as reference)
   let l:ws = matchstr(getline(line('.')), '^\s\+')
 
+  let l:begline = line('.')
+
   " Delete snippet name
   exec 'norm! "_d'.s:begcol.'|"_x'
 
@@ -83,6 +85,10 @@ function! s:insertFile(snipfile) abort
     call append((line('.')), l:suf) | norm! gJ
   endif
   let &l:formatoptions = l:fo_old
+
+  let s:foo = getpos('.')
+
+  exec 'norm! '. l:begline . 'gg' . s:begcol . '|'
 
 endfunction
 
@@ -125,9 +131,15 @@ function! s:evaluate(str) abort
 endfunction
 
 function! s:findPlaceholder(pat) abort " from: https://stackoverflow.com/a/8697727/10247460
-  let [sl, sc] = searchpos(a:pat, 'w')
+  let [sl, sc] = searchpos(a:pat, 'W')
   let s:ph_begin = virtcol('.')
-  let [el, ec] = searchpos(a:pat, 'cnew')
+  if sl == 0 && sc == 0 && s:foo != [0]
+    call setpos('.', s:foo)
+    return ""
+  else
+    let s:foo = [0]
+  endif
+  let [el, ec] = searchpos(a:pat, 'cneW')
   let t = map(getline(sl ? sl : -1, el), 'v:val."\n"')
   if len(t) > 0
     let t[0] = t[0][sc-1:]
