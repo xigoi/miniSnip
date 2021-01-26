@@ -9,7 +9,7 @@ function! s:var(foo) abort
 endfunction
 
 function! miniSnip#trigger() abort
-  let l:cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
+  let l:cword = matchstr(getline('.'), '\v\w+%' . col('.') . 'c')
 
   let s:begcol = virtcol('.') - strchars(l:cword)
 
